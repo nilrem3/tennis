@@ -9,27 +9,58 @@
         let height = canvas.height = 600;
         let ballX = 400;
         let ballY = 300;
+     
         const FPS = 1000 / 30;
         let velX = 10;
         let velY = 10;
+      
         let ballRad = 10;
         let paddleWidth = 20;
-        let paddleHeight = 75;
+        let paddleHeight = 100;
         let lPaddleY = 300;
         let rPaddleY = 300;
-        
+        let lPaddleX = 25;
+        let rPaddleX = 755;
+        let lScore = 0;
+        let rScore = 0;
+        let mX = canvas.width / 2 - paddleWidth / 2;
+        let mY = 300;
+        let velM = 5;
 
         function moveBall(){
             ballX += velX;
             ballY += velY;
             if(ballX > 800 || ballX < 0 )velX *= -1;
             if(ballY > 600 || ballY < 0)velY *= -1;
+            if(ballX < 0) {rScore ++;
+            console.log ("Computer: " + rScore);
+            start();
+            }
+            if(ballX > 800){ lScore ++;
+            console.log("Player: " + lScore);
+            start();
+            }
            
-         
+           
+           //is the ball touching the left paddle?
+            if(ballY < lPaddleY + paddleHeight && ballY > lPaddleY && ballX > lPaddleX && ballX < lPaddleX + paddleWidth){
+            velX *= -1;
+            ballX = lPaddleX + paddleWidth + 1;
+            }
+          //is the ball touching the right paddle?
+          if(ballY < rPaddleY + paddleHeight && ballY > rPaddleY && ballX > rPaddleX && ballX < rPaddleX + paddleWidth){
+            velX *= -1;
+            ballX = rPaddleX - 1;
+           }
+           if(ballY < mY + paddleHeight && ballY > mY && ballX > canvas.width / 2 - paddleWidth / 2 && ballX < canvas.width / 2 + paddleWidth / 2){
+            velX *= -1;
+            if(velX = -10) ballX = canvas.width / 2 - paddleWidth / 2 - 1;
+            if(velX = 10) ballX = canvas.width / 2 + paddleWidth / 2 + 1
+           }
            
             }
              
-             
+        
         
 
         
@@ -53,6 +84,10 @@
             drawRect(755, rPaddleY, paddleWidth, paddleHeight, 'red');
             drawRect(25, lPaddleY, paddleWidth, paddleHeight, 'blue');
             drawCircle(ballX, ballY, ballRad, 'rgb(151, 191, 36)');
+            centerPaddleMove();
+            rPaddleMove();
+            scoring();
+            
         }
 
 
@@ -77,24 +112,75 @@
 
                 canvas.addEventListener('mousemove', function(event){
                         let mousePos = calculateMousePosition(event);  
-                        lPaddleY = mousePos.y - paddleHeight / 2;               
+                        lPaddleY = mousePos.y - paddleHeight / 2;  
+                        if(lPaddleY > 600 - paddleHeight){     
+                            lPaddleY = 600 - paddleHeight;
+                        }     
+                        if(lPaddleY < 0){
+                            lPaddleY = 0;
+                        }        
                 })
         }
 
-        function rPaddleLearn(){
-            let inOne = ballX;
-            let inTwo = ballY;
-            let inThree = velX;
-            let inFour = velY;
-            let inFive = rPaddleY;
-        }
-
-        
-           
-
+       function rPaddleMove(){
           
+           if(rPaddleY + paddleHeight / 2 < ballY){
+               rPaddleY += 9;
+           }
+           if (rPaddleY + paddleHeight / 2 > ballY){
+               rPaddleY -= 9;
+           }
+           if(rPaddleY< 0){
+               rPaddleY = 0;
+           }
+           if (rPaddleY > 600 - paddleHeight){
+               rPaddleY = 600 - paddleHeight;
+           }
+          
+           if (paddleHeight < 10) paddleHeight = 10; 
+           }
+       
 
+        function start(){
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+           
+            rPaddleY = canvas.height / 2;
+            paddleHeight -= 1;
+            
+
+        }
+           
+        function scoring(){
+            if(lScore >= 50){
+                console.log("Player wins!")
+                lScore = 0;
+                rScore = 0;
+                paddleHeight = 101;
+                start();
+
+            }
+            if(rScore >= 50){
+                console.log("Computer wins!")
+                lScore = 0;
+                rScore = 0;
+                paddleHeight = 101
+                start();
+
+            }
+                 
+        }
+       
         
+        function centerPaddleMove(){
+            mY += velM;
+            drawRect(canvas.width / 2 - paddleWidth / 2, mY, paddleWidth, paddleHeight, 'black');
+            if(mY < 0 || mY > canvas.height - paddleHeight){
+                velM *= -1;
+                
+            }
+
+        }
 
         
 
