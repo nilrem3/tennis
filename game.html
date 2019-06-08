@@ -15,8 +15,15 @@
         let velY = 10;
       
         let ballRad = 10;
+        let centerPaddleHeight = 100;
         let paddleWidth = 20;
         let paddleHeight = 100;
+        let pinkPaddleHeight = 100;
+        let pinkPaddleWidth = 20;
+        let pinkX = Math.random() * width;
+        let pinkY = Math.random() * height;
+        let orangeX = Math.random() * width;
+        let orangeY = Math.random() * height;
         let lPaddleY = 300;
         let rPaddleY = 300;
         let lPaddleX = 25;
@@ -26,39 +33,75 @@
         let mX = canvas.width / 2 - paddleWidth / 2;
         let mY = 300;
         let velM = 5;
+        let pinkbounced = false;
+        let teleportedDiffY = 0;
+        let teleportedDiffX = 0;
+        let endScreen = false;
+        let wincondition = 5;
+        let winner = "none";
+        let loser = "none";
+        let loserScore = 0;
+        let winMessage = " "
+        let canPlayAgain = false;
+        let circleX = 0;
+        let circleY = 0;
 
         function moveBall(){
+
+            
+
             ballX += velX;
             ballY += velY;
-            if(ballX > 800 || ballX < 0 )velX *= -1;
-            if(ballY > 600 || ballY < 0)velY *= -1;
+            if(ballX > 800 || ballX < 0 ) {
+                
+                velX *= -1;
+                
+            }
+            if(ballY > 600 || ballY < 0){
+               
+                velY *= -1;
+            }
             if(ballX < 0) {rScore ++;
-            console.log ("Computer: " + rScore);
+           
             start();
             }
             if(ballX > 800){ lScore ++;
-            console.log("Player: " + lScore);
+           
             start();
             }
            
            
            //is the ball touching the left paddle?
             if(ballY < lPaddleY + paddleHeight && ballY > lPaddleY && ballX > lPaddleX && ballX < lPaddleX + paddleWidth){
-            velX *= -1;
-            ballX = lPaddleX + paddleWidth + 1;
+           velX *= -1;
+           var deltaY = (ballY - lPaddleY) - paddleHeight / 2;
+           velY = deltaY * 0.35; 
+           
+           
             }
           //is the ball touching the right paddle?
           if(ballY < rPaddleY + paddleHeight && ballY > rPaddleY && ballX > rPaddleX && ballX < rPaddleX + paddleWidth){
-            velX *= -1;
-            ballX = rPaddleX - 1;
+           velX *= -1;
+           var deltaY = (ballY - rPaddleY) - paddleHeight / 2;
+           velY = deltaY * 0.35; 
+           
+           
            }
-           if(ballY < mY + paddleHeight && ballY > mY && ballX > canvas.width / 2 - paddleWidth / 2 && ballX < canvas.width / 2 + paddleWidth / 2){
+           //is the ball touching the center paddle?
+           if(ballY < mY + centerPaddleHeight && ballY > mY && ballX > canvas.width / 2 - paddleWidth / 2 && ballX < canvas.width / 2 + paddleWidth / 2){
             velX *= -1;
-            if(velX = -10) ballX = canvas.width / 2 - paddleWidth / 2 - 1;
-            if(velX = 10) ballX = canvas.width / 2 + paddleWidth / 2 + 1
+           }
+
+           if(ballY < pinkY + pinkPaddleHeight && ballY > pinkY && ballX > pinkX - pinkPaddleWidth / 2 && ballX < pinkX + pinkPaddleWidth / 2){
+           ballX -= teleportedDiffX;
+           ballY -= teleportedDiffY;
+           }
+           if(ballY < orangeY + pinkPaddleHeight && ballY > orangeY && ballX > orangeX - pinkPaddleWidth / 2 && ballX < orangeX + pinkPaddleWidth / 2){
+           ballX += teleportedDiffX;
+           ballY += teleportedDiffY;
            }
            
-            }
+           }
              
         
         
@@ -78,16 +121,30 @@
         }
 
         function updateAll(){
-            moveBall();
             drawRect(0, 0, width, height, 'green');
+            if (endScreen){
+                context.fillStyle = 'white';
+                context.fillText(winMessage, 100, 200);
+            }else{
+            moveBall();
+            
+            speedChange();
             drawRect((width/2) - 10, 5, 20, 590, 'white');
             drawRect(755, rPaddleY, paddleWidth, paddleHeight, 'red');
             drawRect(25, lPaddleY, paddleWidth, paddleHeight, 'blue');
             drawCircle(ballX, ballY, ballRad, 'rgb(151, 191, 36)');
+            drawRect(pinkX, pinkY, pinkPaddleWidth, pinkPaddleHeight, 'pink');
+            drawRect(orangeX, orangeY, pinkPaddleWidth, pinkPaddleHeight, 'orange');
+            context.fillText(rScore, 750, 50);
+            context.fillText(lScore, 50, 50);
+
+            
+            
             centerPaddleMove();
             rPaddleMove();
-            scoring();
-            
+            context.fillText(rScore, 750, 50);
+            context.fillText(lScore, 50, 50);
+            }
         }
 
 
@@ -118,7 +175,8 @@
                         }     
                         if(lPaddleY < 0){
                             lPaddleY = 0;
-                        }        
+                        }     
+                        canvas.addEventListener('mousedown', handleMouseClick)  
                 })
         }
 
@@ -142,46 +200,73 @@
        
 
         function start(){
+            if(lScore >= wincondition){
+                endScreen = true;
+                winner = "player"
+                loser = "computer"
+                loserScore = rScore;
+                winMessage = winner + " wins!   " + loser + " had " + loserScore + " points!    " + " click to play again!";
+            }
+            if(rScore >= wincondition){
+                endScreen = true;
+                winner = "computer"
+                loser = "player"
+                loserScore = lScore;
+                winMessage = winner + " wins!    " + loser + " had " + loserScore + " points!    " + " click to play again!";
+            }
             ballX = canvas.width / 2;
             ballY = canvas.height / 2;
            
             rPaddleY = canvas.height / 2;
             paddleHeight -= 1;
+            centerPaddleHeight += 2;
+            pinkPaddleMove();
             
 
         }
            
-        function scoring(){
-            if(lScore >= 50){
-                console.log("Player wins!")
-                lScore = 0;
-                rScore = 0;
-                paddleHeight = 101;
-                start();
-
-            }
-            if(rScore >= 50){
-                console.log("Computer wins!")
-                lScore = 0;
-                rScore = 0;
-                paddleHeight = 101
-                start();
-
-            }
-                 
-        }
+       
        
         
         function centerPaddleMove(){
             mY += velM;
-            drawRect(canvas.width / 2 - paddleWidth / 2, mY, paddleWidth, paddleHeight, 'black');
-            if(mY < 0 || mY > canvas.height - paddleHeight){
+            drawRect(canvas.width / 2 - paddleWidth / 2, mY, paddleWidth, centerPaddleHeight, 'black');
+            if(mY < 0 || mY > canvas.height - centerPaddleHeight){
                 velM *= -1;
                 
             }
 
+
         }
 
+        function pinkPaddleMove(){
+            pinkX = Math.random() * width;
+            pinkY = Math.random() * height;
+            pinkPaddleWidth = Math.random() * 80 + 20;
+            pinkPaddleHeight = Math.random() * 80 + 20;
+            orangeX = Math.random() * width;
+            orangeY = Math.random() * height;
+            teleportedDiffY = pinkY - orangeY;
+            teleportedDiffX = pinkX - orangeX;
+           
+        }
+
+        function handleMouseClick(evt){
+            if(endScreen){
+                lScore = 0;
+                rScore = 0;
+                start();
+                endScreen = false;
+                
+
+            }
+        }
+       
+        function speedChange(){
+            circleX = ballX;
+            circleY = ballY;
+            
+        }
         
 
         
